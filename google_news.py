@@ -6,7 +6,7 @@ import urllib
 import unicodedata
 
 # Google News Frontpage
-GN_FRONT = 'https://www.google.com/news?pz=1&cf=all&ned=us&hl=en&output=rss'
+GN_RSS_FRONT = 'https://www.google.com/news?pz=1&cf=all&ned=us&hl=en&output=rss'
 
 
 class section:
@@ -19,10 +19,11 @@ class section:
         return str(self)
 
     def __str__(self):
-        return "SECTION " + str(self.name) + " " + str(self.url) + " " + str(self.trending_topics)
+        # JSON formatted
+        return '{"SECTION": {"name": ' + str(self.name) + ', "url": ' + str(self.url) + ', "trending_topics": ' + str(self.trending_topics) + '}}'
 
     def get_trending_topics(self):
-        nav_topic_list = Element(self.url.download()).by_id('nav-topic-list')
+        nav_topic_list = Element(self.url.download()).by_id('nav-topic-list')  # DOM
 
         if nav_topic_list is not None:
             plaintext_src = plaintext(nav_topic_list.source)
@@ -32,10 +33,10 @@ class section:
 
         trending_topics = []
 
-        print "SECTION", self.name
+        print "# trending topics:", len(topics)
 
         for topic in topics:
-            t = self.__ttopic__(topic)
+            t = self.__ttopic__(topic, self.url)
             trending_topics.append(t)
 
         return trending_topics
@@ -43,18 +44,22 @@ class section:
     __get_trending_topics = get_trending_topics  # private copy
 
     class __ttopic__:
-        def __init__(self, name):
-            print name
+        def __init__(self, name, url):
             normalized_name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
             self.name = normalized_name
-            url = GN_FRONT + '&q=' + urllib.quote(self.name)
-            self.titles = self.__get_titles(url)
+            if self.name != 'All':
+                url_str = GN_RSS_FRONT + '&q=' + urllib.quote(self.name)
+            else:  # no particular topics
+                url_str = url.string.encode('ascii', 'ignore')
+            self.url = url_str
+            self.titles = self.__get_titles(self.url)
 
         def __repr__(self):
             return str(self)
 
         def __str__(self):
-            return '{TOPIC: ' + str(self.name) + ', ' + str(self.titles) + '}'
+            # JSON formatted
+            return '{"TOPIC": {"name": ' + str(self.name) + ', "url": ' + str(self.url) + ', "titles": ' + str(self.titles) + '}}'
 
         def get_titles(self, rss_url):
             """ PARAM: url of Google News RSS feed
@@ -64,7 +69,7 @@ class section:
 
             titles = []
 
-            # for each article
+            # for each article on rss page
             for i in range(0, len(feed.entries)):
                 # convert unicode to string
                 title_str = feed.entries[i].title.encode('ascii', 'ignore')
@@ -83,17 +88,17 @@ def set_urls_dict():
     url_prefix = 'https://news.google.com/news/section?pz=1&cf=all&topic='
     urls_dict = {}
 
-    urls_dict['Front Page'] = URL(GN_FRONT)
+    urls_dict['Front Page'] = URL(GN_RSS_FRONT)
     urls_dict['Top Stories'] = URL('https://news.google.com/nwshp?hl=en&tab=nn')
 
-    urls_dict['World'] = URL(url_prefix + 'w')
+    '''urls_dict['World'] = URL(url_prefix + 'w')
     urls_dict['U.S.'] = URL(url_prefix + 'n')
     urls_dict['Business'] = URL(url_prefix + 'b')
     urls_dict['Technology'] = URL(url_prefix + 'tc')
     urls_dict['Entertainment'] = URL(url_prefix + 'e')
     urls_dict['Sports'] = URL(url_prefix + 's')
     urls_dict['Health'] = URL(url_prefix + 'm')
-    urls_dict['Science'] = URL(url_prefix + 'snc')
+    urls_dict['Science'] = URL(url_prefix + 'snc')'''
 
     return urls_dict
 
@@ -102,10 +107,14 @@ def main():
     urls_dict = set_urls_dict()
 
     sections = []
+    count = 1
+    total = len(urls_dict)
 
     for name, url in urls_dict.iteritems():
+        print "Creating section", count, "of", total, "... (", name, ")"
         s = section(name, url)
         sections.append(s)
+        count += 1
 
     print sections
 
@@ -114,7 +123,3 @@ if __name__ == "__main__":
 
 # next: run titles through Stanford Named Entity Tagger
   # if no tags made in a title, go to 'summary' and choose another title there to tag
-
-# TODO change class string representations to JSON format
-# TODO need more output to command line when running code
-# TODO more comments
