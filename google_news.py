@@ -4,6 +4,8 @@ import feedparser
 from pattern.web import URL, Element, plaintext
 import urllib
 import unicodedata
+import ner
+import collections
 
 # Google News Frontpage
 GN_RSS_FRONT = 'https://www.google.com/news?pz=1&cf=all&ned=us&hl=en&output=rss'
@@ -53,6 +55,7 @@ class section:
                 url_str = url.string.encode('ascii', 'ignore')
             self.url = url_str
             self.titles = self.__get_titles(self.url)
+            self.entities = []
 
         def __repr__(self):
             return str(self)
@@ -91,16 +94,55 @@ def set_urls_dict():
     urls_dict['Front Page'] = URL(GN_RSS_FRONT)
     urls_dict['Top Stories'] = URL('https://news.google.com/nwshp?hl=en&tab=nn')
 
-    '''urls_dict['World'] = URL(url_prefix + 'w')
+    urls_dict['World'] = URL(url_prefix + 'w')
     urls_dict['U.S.'] = URL(url_prefix + 'n')
     urls_dict['Business'] = URL(url_prefix + 'b')
     urls_dict['Technology'] = URL(url_prefix + 'tc')
     urls_dict['Entertainment'] = URL(url_prefix + 'e')
     urls_dict['Sports'] = URL(url_prefix + 's')
     urls_dict['Health'] = URL(url_prefix + 'm')
-    urls_dict['Science'] = URL(url_prefix + 'snc')'''
+    urls_dict['Science'] = URL(url_prefix + 'snc')
 
     return urls_dict
+
+
+def get_ner_entities(sections):
+    startup_eng_ec2 = 'ec2-54-215-151-141.us-west-1.compute.amazonaws.com'
+    tagger = ner.SocketNER(host=startup_eng_ec2, port=8888, output_format='slashTags')
+
+    for sec in sections:
+        tt = sec.trending_topics
+        entities = []
+
+        for t in tt:
+            titles = t.titles
+
+            for title in titles:
+                entity_dict = tagger.get_entities(title)
+                for k in entity_dict.keys():
+                    if k != "LOCATION" and k != "ORGANIZATION" and k != "PERSON":
+                        del entity_dict[k]
+
+                # retrieve entities only, without tags
+                entity_values = entity_dict.values()
+
+                # flatten list of lists from dict values
+                entities.extend([item for sublist in entity_values for item in sublist])
+
+            t.entities = entities
+            print t.entities
+
+
+def count_occurences(sections):
+    big_list = []
+
+    for sec in sections:
+        tt = sec.trending_topics
+
+        for t in tt:
+            big_list.extend(t.entities)
+
+    print collections.Counter(big_list).most_common()
 
 
 def main():
@@ -117,6 +159,10 @@ def main():
         count += 1
 
     print sections
+
+    get_ner_entities(sections)
+
+    count_occurences(sections)
 
 if __name__ == "__main__":
     main()
