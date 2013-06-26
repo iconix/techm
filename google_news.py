@@ -6,6 +6,7 @@ import urllib
 import unicodedata
 import ner
 import collections
+import json
 
 # Google News Frontpage
 GN_RSS_FRONT = 'https://www.google.com/news?pz=1&cf=all&ned=us&hl=en&output=rss'
@@ -22,7 +23,7 @@ class section:
 
     def __str__(self):
         # JSON formatted
-        return '{"SECTION": {"name": ' + str(self.name) + ', "url": ' + str(self.url) + ', "trending_topics": ' + str(self.trending_topics) + '}}'
+        return '{"SECTION": {"name": "' + str(self.name) + '", "url": "' + str(self.url) + '", "trending_topics": ' + str(self.trending_topics) + '}}'
 
     def get_trending_topics(self):
         nav_topic_list = Element(self.url.download()).by_id('nav-topic-list')  # DOM
@@ -62,12 +63,13 @@ class section:
 
         def __str__(self):
             # JSON formatted
-            return '{"TOPIC": {"name": ' + str(self.name) + ', "url": ' + str(self.url) + ', "titles": ' + str(self.titles) + '}}'
+            return '{"TOPIC": {"name": "' + str(self.name) + '", "url": "' + str(self.url) + '", "titles": ' + json.dumps(self.titles) + '}}'
 
+        """
+        :param rss_url: raw string representing Google News RSS feed url
+        :returns: article titles for url
+        """
         def get_titles(self, rss_url):
-            """ PARAM: url of Google News RSS feed
-                RETURNS: article titles for url """
-
             feed = feedparser.parse(rss_url)
 
             titles = []
@@ -97,18 +99,18 @@ def set_urls_dict():
     urls_dict['World'] = URL(url_prefix + 'w')
     urls_dict['U.S.'] = URL(url_prefix + 'n')
     urls_dict['Business'] = URL(url_prefix + 'b')
-    urls_dict['Technology'] = URL(url_prefix + 'tc')
+    '''urls_dict['Technology'] = URL(url_prefix + 'tc')
     urls_dict['Entertainment'] = URL(url_prefix + 'e')
     urls_dict['Sports'] = URL(url_prefix + 's')
     urls_dict['Health'] = URL(url_prefix + 'm')
-    urls_dict['Science'] = URL(url_prefix + 'snc')
+    urls_dict['Science'] = URL(url_prefix + 'snc')'''
 
     return urls_dict
 
 
 def get_ner_entities(sections):
-    startup_eng_ec2 = 'ec2-54-215-151-141.us-west-1.compute.amazonaws.com'
-    tagger = ner.SocketNER(host=startup_eng_ec2, port=8888, output_format='slashTags')
+    host = 'localhost'
+    tagger = ner.SocketNER(host=host, port=8888, output_format='slashTags')
 
     for sec in sections:
         tt = sec.trending_topics
@@ -130,19 +132,19 @@ def get_ner_entities(sections):
                 entities.extend([item for sublist in entity_values for item in sublist])
 
             t.entities = entities
-            print t.entities
 
 
-def count_occurences(sections):
-    big_list = []
-
+def count_occurrences(sections):
     for sec in sections:
+        big_list = []
+
         tt = sec.trending_topics
 
         for t in tt:
-            big_list.extend(t.entities)
+            big_list.append(t.entities)
 
-    print collections.Counter(big_list).most_common()
+        for l in big_list:
+            print collections.Counter(l).most_common()
 
 
 def main():
@@ -161,11 +163,20 @@ def main():
     print sections
 
     get_ner_entities(sections)
-
-    count_occurences(sections)
+    count_occurrences(sections)
 
 if __name__ == "__main__":
     main()
 
 # next: run titles through Stanford Named Entity Tagger
   # if no tags made in a title, go to 'summary' and choose another title there to tag
+
+# TODO restructure class system to better include entities and frequency counts
+    # tuple with (entity, freq count) ?
+    # new class for a title: title_str, list of tuples ?
+# TODO restructure code into separate modules
+    # separate out constants into a file ?
+    # separate out dependencies on other services (GN, Stanford NER) ?
+# TODO analyze article summaries instead of titles
+# TODO count_occurrences is still problematic...
+# TODO comments for all classes, methods, functions
