@@ -55,6 +55,7 @@ class section:
             else:  # no particular topics
                 url_str = url.string.encode('ascii', 'ignore')
             self.url = url_str
+
             self.titles = self.__get_titles(self.url)
             self.entities = []
 
@@ -63,7 +64,7 @@ class section:
 
         def __str__(self):
             # JSON formatted
-            return '{"TOPIC": {"name": "' + str(self.name) + '", "url": "' + str(self.url) + '", "titles": ' + json.dumps(self.titles) + '}}'
+            return '{"TOPIC": {"name": "' + str(self.name) + '", "url": "' + str(self.url) + '", "titles": ' + str(self.titles) + '}}'
 
         """
         :param rss_url: raw string representing Google News RSS feed url
@@ -82,11 +83,50 @@ class section:
                 # remove news organization at end of title
                 title_str = title_str[:title_str.index(' - ')]
 
-                titles.append(title_str)
+                entities = self.__get_ner_entities(title_str)
+
+                # count occurrences of each entity (returns list of tuples)
+                entity_freqs = collections.Counter(entities).most_common()
+
+                title = self.__title__(title_str, entity_freqs)
+                titles.append(title)
 
             return titles
 
+        def get_ner_entities(self, string):
+            host = 'localhost'
+            tagger = ner.SocketNER(host=host, port=8888, output_format='slashTags')
+
+            entity_dict = tagger.get_entities(string)
+            for k in entity_dict.keys():
+                if k != "LOCATION" and k != "ORGANIZATION" and k != "PERSON":
+                    del entity_dict[k]
+
+            # retrieve entities only, without tags
+            entity_values = entity_dict.values()
+
+            # flatten list of lists from dict values
+            return [item for sublist in entity_values for item in sublist]
+
+        class __title__:
+            def __init__(self, title_str, entity_freqs):
+                self.title_str = title_str
+                self.entity_freqs = entity_freqs
+
+            def __repr__(self):
+                return str(self)
+
+            def __str__(self):
+                entities = []
+                # turn each tuple into JSON serializable dictionary
+                for e in self.entity_freqs:
+                    entities.append(dict(self.entity_freqs))
+
+                # JSON formatted
+                return '{"TITLE": {"title_str": "' + str(self.title_str) + '", "entities": ' + json.dumps(entities) + '}}'
+
         __get_titles = get_titles  # private copy
+        __get_ner_entities = get_ner_entities  # private copy
 
 
 def set_urls_dict():
@@ -108,45 +148,6 @@ def set_urls_dict():
     return urls_dict
 
 
-def get_ner_entities(sections):
-    host = 'localhost'
-    tagger = ner.SocketNER(host=host, port=8888, output_format='slashTags')
-
-    for sec in sections:
-        tt = sec.trending_topics
-        entities = []
-
-        for t in tt:
-            titles = t.titles
-
-            for title in titles:
-                entity_dict = tagger.get_entities(title)
-                for k in entity_dict.keys():
-                    if k != "LOCATION" and k != "ORGANIZATION" and k != "PERSON":
-                        del entity_dict[k]
-
-                # retrieve entities only, without tags
-                entity_values = entity_dict.values()
-
-                # flatten list of lists from dict values
-                entities.extend([item for sublist in entity_values for item in sublist])
-
-            t.entities = entities
-
-
-def count_occurrences(sections):
-    for sec in sections:
-        big_list = []
-
-        tt = sec.trending_topics
-
-        for t in tt:
-            big_list.append(t.entities)
-
-        for l in big_list:
-            print collections.Counter(l).most_common()
-
-
 def main():
     urls_dict = set_urls_dict()
 
@@ -162,8 +163,8 @@ def main():
 
     print sections
 
-    get_ner_entities(sections)
-    count_occurrences(sections)
+    #get_ner_entities(sections)
+    #count_occurrences(sections)
 
 if __name__ == "__main__":
     main()
