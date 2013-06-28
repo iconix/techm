@@ -7,9 +7,7 @@ import unicodedata
 import ner
 import collections
 import json
-
-# Google News Frontpage
-GN_RSS_FRONT = 'https://www.google.com/news?pz=1&cf=all&ned=us&hl=en&output=rss'
+import re
 
 
 class section:
@@ -31,7 +29,7 @@ class section:
         if nav_topic_list is not None:
             plaintext_src = plaintext(nav_topic_list.source)
             topics = filter(None, plaintext_src.splitlines())
-        else:  # no particular topics
+        else:  # no particular topics, which shouldn't happen anymore
             topics = [u'All']
 
         trending_topics = []
@@ -49,14 +47,16 @@ class section:
     class __ttopic__:
         def __init__(self, name, url):
             normalized_name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
-            self.name = normalized_name
+            #self.name = normalized_name
+            self.name = "Kim Kardashian"
             if self.name != 'All':
-                url_str = GN_RSS_FRONT + '&q=' + urllib.quote(self.name)
+                gn_rss = 'https://www.google.com/news?cf=all&ned=us&hl=en&output=rss&num=100'
+                url_str = gn_rss + '&q=' + urllib.quote(self.name)
             else:  # no particular topics
                 url_str = url.string.encode('ascii', 'ignore')
             self.url = url_str
             self.freqs = []
-            self.titles = self.__get_titles_and_summaries(self.url)
+            self.titles = self.__get_titles(self.url)
             self.freqs = collections.Counter(self.freqs).most_common()
 
         def __repr__(self):
@@ -70,8 +70,9 @@ class section:
         :param rss_url: raw string representing Google News RSS feed url
         :returns: article titles for url
         """
-        def get_titles_and_summaries(self, rss_url):
-            feed = feedparser.parse(rss_url)
+        def get_titles(self, rss_url):
+            #feed = feedparser.parse(rss_url)
+            feed = feedparser.parse(r'/home/narhodes/Documents/google_news_feed/kim_kardashian.rss')
             entries = feed.entries
 
             titles = []
@@ -108,11 +109,17 @@ class section:
                 if k != "LOCATION" and k != "ORGANIZATION" and k != "PERSON":
                     del entity_dict[k]
 
-            # retrieve entities only, without tags
-            entity_values = entity_dict.values()
+            entity_values = []  # don't need NER tags within dict keys
 
-            # flatten list of lists from dict values
-            return [item for sublist in entity_values for item in sublist]
+            # remove all mentions of words contained in ttopic.name
+            for k, v in entity_dict.items():
+                for entity in v:
+                    for word in re.split('\s', self.name):
+                        entity = entity.replace(word, '').strip()
+                    if entity != '':
+                        entity_values.append(entity)
+
+            return entity_values
 
         class __title__:
             def __init__(self, title_str, entity_freqs, all_ttopic_freqs):
@@ -130,7 +137,7 @@ class section:
                 # JSON formatted
                 return '{"TITLE": {"title_str": "' + str(self.title_str) + '", "entities": ' + json.dumps(dict(self.entity_freqs)) + '}}'
 
-        __get_titles_and_summaries = get_titles_and_summaries  # private copy
+        __get_titles = get_titles  # private copy
         __get_ner_entities = get_ner_entities  # private copy
 
 
@@ -138,17 +145,17 @@ def set_urls_dict():
     url_prefix = 'https://news.google.com/news/section?pz=1&cf=all&topic='
     urls_dict = {}
 
-    urls_dict['Front Page'] = URL(GN_RSS_FRONT)
+    #urls_dict['Front Page'] = URL(GN_RSS_FRONT)
     urls_dict['Top Stories'] = URL('https://news.google.com/nwshp?hl=en&tab=nn')
 
-    urls_dict['World'] = URL(url_prefix + 'w')
+    '''urls_dict['World'] = URL(url_prefix + 'w')
     urls_dict['U.S.'] = URL(url_prefix + 'n')
     urls_dict['Business'] = URL(url_prefix + 'b')
     urls_dict['Technology'] = URL(url_prefix + 'tc')
     urls_dict['Entertainment'] = URL(url_prefix + 'e')
     urls_dict['Sports'] = URL(url_prefix + 's')
     urls_dict['Health'] = URL(url_prefix + 'm')
-    urls_dict['Science'] = URL(url_prefix + 'snc')
+    urls_dict['Science'] = URL(url_prefix + 'snc')'''
 
     return urls_dict
 
@@ -168,28 +175,6 @@ def main():
 
     print sections
 
-    '''for sec in sections:
-        ttopics = sec.trending_topics
-        for topic in ttopics:
-            titles = topic.titles
-            all_entity_freqs_for_topic = []
-            for t in titles:
-                for e in t.entity_freqs:
-                    all_entity_freqs_for_topic.append(str(e[0])*int(e[1]))
-            print topic.name, collections.Counter(all_entity_freqs_for_topic).most_common()'''
 
 if __name__ == "__main__":
     main()
-
-# next: run titles through Stanford Named Entity Tagger
-  # if no tags made in a title, go to 'summary' and choose another title there to tag
-
-# TODO restructure class system to better include entities and frequency counts
-    # tuple with (entity, freq count) ?
-    # new class for a title: title_str, list of tuples ?
-# TODO restructure code into separate modules
-    # separate out constants into a file ?
-    # separate out dependencies on other services (GN, Stanford NER) ?
-# TODO analyze article summaries instead of titles
-# TODO count_occurrences is still problematic...
-# TODO comments for all classes, methods, functions
