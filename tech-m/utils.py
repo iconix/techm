@@ -56,6 +56,14 @@ def get_ner_entities(string, name=None, host='localhost', port=8888, output_form
                 if len(entity):  # if entity not empty
                     entity_values.append(entity)
 
+    tmp = []
+    # remove '&' and extra spaces in entities
+    for entity in entity_values:
+        if '&' in entity:
+            entity = entity.replace('&', '').strip()
+        tmp.append(entity)
+    entity_values = tmp
+
     return entity_values
 
 
@@ -97,13 +105,15 @@ def get_trending_topics(section):
     from classes.ttopic import _TTopic  # custom module
 
     gn_nav_topic_list = 'nav-topic-list'  # DOM
-    topics_element = Element(section.url.download()).by_id(gn_nav_topic_list)
+    #topics_element = Element(section.url.download()).by_id(gn_nav_topic_list)
+    topics_element = None
 
     if topics_element is not None:
         plaintext_src = plaintext(topics_element.source)
         topics = filter(None, plaintext_src.splitlines())
     else:  # no particular topics, which shouldn't happen currently
-        topics = [u'All']
+        #topics = [u'All']
+        topics = [u'Kim Kardashian']
 
     trending_topics = []
 

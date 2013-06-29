@@ -2,11 +2,13 @@
 
 import collections
 import json
+import re
 import unicodedata
 import urllib
 
-# custom module
+# custom modules
 from utils import get_titles
+from classes.ps import PrefixSpan
 
 
 class _TTopic(object):  # new-style class, inherits from 'object'
@@ -22,8 +24,8 @@ class _TTopic(object):  # new-style class, inherits from 'object'
             return str(self)
 
         def __init__(self, name, url):
-            #normalized_name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
-            normalized_name = "Kim Kardashian"
+            normalized_name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
+            #normalized_name = "Kim Kardashian"
 
             if normalized_name == 'All':  # no particular topics
                 url_str = url.string.encode('ascii', 'ignore')
@@ -36,7 +38,23 @@ class _TTopic(object):  # new-style class, inherits from 'object'
             self._url = url_str
             self._freqs = []
             self._titles = get_titles(self)
-            self._freqs = collections.Counter(self._freqs).most_common()
+
+            # start PrefixSpan
+            db = []
+            for entity in self._freqs:
+                db.append(re.split('\s+', entity))
+            span = PrefixSpan(db)
+            span.run(2)
+            patterns = span.get_patterns()
+
+            formatted_patterns = []
+            for p in patterns:
+                p0 = ' '.join(p[0])
+                t = [p0] * int(p[1])
+                formatted_patterns.extend(t)
+            # end PrefixSpan
+
+            self._freqs = collections.Counter(formatted_patterns).most_common()
 
         @property
         def name(self):
