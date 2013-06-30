@@ -18,7 +18,7 @@ def main():
         sections.append(s_obj)
         count += 1
 
-    print sections
+    print '{"SECTIONS": ' + str(sections) + '}'
 
 
 if __name__ == "__main__":

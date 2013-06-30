@@ -7,10 +7,9 @@ from utils import get_trending_topics
 class Section(object):  # new-style class, inherits from 'object'
     def __str__(self):
         # JSON formatted
-        return ('{"SECTION": ' +
-                '{"name": "' + str(self.name) +
+        return ('{"name": "' + str(self.name) +
                 '", "url": "' + str(self.url) +
-                '", "trending_topics": ' + str(self.trending_topics) + '}}')
+                '", "TTOPICS": ' + str(self.trending_topics) + '}')
 
     def __repr__(self):
         return str(self)

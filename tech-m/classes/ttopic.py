@@ -14,19 +14,16 @@ from classes.ps import PrefixSpan
 class _TTopic(object):  # new-style class, inherits from 'object'
         def __str__(self):
             # JSON formatted
-            return ('{"TOPIC": ' +
-                    '{"name": "' + str(self.name) +
+            return ('{"name": "' + str(self.name) +
                     '", "url": "' + str(self.url) +
                     '", "all_topic_entities": ' + json.dumps(dict(self.freqs)) +
-                    ', "titles": ' + str(self.titles) + '}}')
+                    ', "TITLES": ' + str(self.titles) + '}')
 
         def __repr__(self):
             return str(self)
 
         def __init__(self, name, url):
             normalized_name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
-            #normalized_name = "Kim Kardashian"
-
             if normalized_name == 'All':  # no particular topics
                 url_str = url.string.encode('ascii', 'ignore')
             else:
