@@ -7,7 +7,7 @@ import unicodedata
 import urllib
 
 # custom modules
-from utils import get_titles
+from utils import get_articles, remove_unrelated_articles
 from classes.ps import PrefixSpan
 
 
@@ -17,7 +17,7 @@ class _TTopic(object):  # new-style class, inherits from 'object'
             return ('{"name": "' + str(self.name) +
                     '", "url": "' + str(self.url) +
                     '", "all_topic_entities": ' + json.dumps(dict(self.freqs)) +
-                    ', "TITLES": ' + str(self.titles) + '}')
+                    ', "ARTICLES": ' + str(self.articles) + '}')
 
         def __repr__(self):
             return str(self)
@@ -30,11 +30,11 @@ class _TTopic(object):  # new-style class, inherits from 'object'
                 gn_rss = 'https://www.google.com/news?cf=all&ned=us&hl=en&output=rss&num=100'
                 url_str = gn_rss + '&q=' + urllib.quote(normalized_name)
 
-            self._Title = None  # inner class
+            self._Article = None  # inner class
             self._name = normalized_name
             self._url = url_str
             self._freqs = []
-            self._titles = get_titles(self)
+            self._articles = get_articles(self)
 
             # start PrefixSpan
             db = []
@@ -52,6 +52,8 @@ class _TTopic(object):  # new-style class, inherits from 'object'
             # end PrefixSpan
 
             self._freqs = collections.Counter(formatted_patterns).most_common()
+            self._articles = remove_unrelated_articles(self)
+            print len(self._articles)
 
         @property
         def name(self):
@@ -62,17 +64,17 @@ class _TTopic(object):  # new-style class, inherits from 'object'
             return self._url
 
         @property
-        def titles(self):
-            return self._titles
+        def articles(self):
+            return self._articles
 
         @property
         def freqs(self):
             return self._freqs
 
         @property
-        def Title(self):
-            return self._Title
+        def Article(self):
+            return self._Article
 
-        @Title.setter
-        def Title(self, value):
-            self._Title = value
+        @Article.setter
+        def Article(self, value):
+            self._Article = value
