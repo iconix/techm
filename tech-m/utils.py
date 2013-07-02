@@ -23,14 +23,14 @@ def set_urls_dict():
 
     urls_dict['Top Stories'] = URL('https://news.google.com/nwshp?hl=en&tab=nn')
 
-    urls_dict['World'] = URL(url_prefix + 'w')
+    '''urls_dict['World'] = URL(url_prefix + 'w')
     urls_dict['U.S.'] = URL(url_prefix + 'n')
     urls_dict['Business'] = URL(url_prefix + 'b')
     urls_dict['Technology'] = URL(url_prefix + 'tc')
     urls_dict['Entertainment'] = URL(url_prefix + 'e')
     urls_dict['Sports'] = URL(url_prefix + 's')
     urls_dict['Health'] = URL(url_prefix + 'm')
-    urls_dict['Science'] = URL(url_prefix + 'snc')
+    urls_dict['Science'] = URL(url_prefix + 'snc')'''
 
     return urls_dict
 
@@ -70,8 +70,8 @@ def get_ner_entities(string, name=None, host='localhost', port=8888, output_form
 def get_articles(ttopic):
     from classes.article import _Article  # custom module
 
-    feed = feedparser.parse(ttopic.url)
-    #feed = feedparser.parse(r'/home/narhodes/Documents/google_news_feed/kim_kardashian.rss')
+    #feed = feedparser.parse(ttopic.url)
+    feed = feedparser.parse(r'/home/narhodes/Documents/google_news_feed/kim_kardashian.rss')
     entries = feed.entries
 
     articles = []
@@ -116,8 +116,8 @@ def get_trending_topics(section):
     from classes.ttopic import _TTopic  # custom module
 
     gn_nav_topic_list = 'nav-topic-list'  # DOM
-    topics_element = Element(section.url.download()).by_id(gn_nav_topic_list)
-    #topics_element = None
+    #topics_element = Element(section.url.download()).by_id(gn_nav_topic_list)
+    topics_element = None
 
     if topics_element is not None:
         plaintext_src = plaintext(topics_element.source)

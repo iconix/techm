@@ -100,4 +100,6 @@ class PrefixSpan:
                             new_projection_db.append((sid, j+1))
                             break
                 prefixes.append((new_pattern, new_sup, new_projection_db))
+                if (len(pattern) > 0):  # prevent counting sequences with gaps as patterns
+                    break
         return prefixes

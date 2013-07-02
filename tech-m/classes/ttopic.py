@@ -53,7 +53,6 @@ class _TTopic(object):  # new-style class, inherits from 'object'
 
             self._freqs = collections.Counter(formatted_patterns).most_common()
             self._articles = remove_unrelated_articles(self)
-            print len(self._articles)
 
         @property
         def name(self):
