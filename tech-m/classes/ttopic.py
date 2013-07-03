@@ -7,7 +7,11 @@ import unicodedata
 import urllib
 
 # custom modules
-from utils import get_articles, remove_unrelated_articles
+from utils import (
+    get_articles,
+    remove_unrelated_articles,
+    cluster_entities
+)
 from classes.ps import PrefixSpan
 
 
@@ -16,7 +20,7 @@ class _TTopic(object):  # new-style class, inherits from 'object'
             # JSON formatted
             return ('{"name": "' + str(self.name) +
                     '", "url": "' + str(self.url) +
-                    '", "all_topic_entities": ' + json.dumps(dict(self.freqs)) +
+                    '", "all_topic_entities": ' + json.dumps(self.freqs) +
                     ', "ARTICLES": ' + str(self.articles) + '}')
 
         def __repr__(self):
@@ -53,6 +57,7 @@ class _TTopic(object):  # new-style class, inherits from 'object'
 
             self._freqs = collections.Counter(formatted_patterns).most_common()
             self._articles = remove_unrelated_articles(self)
+            self._freqs = cluster_entities(dict(self._freqs))
 
         @property
         def name(self):

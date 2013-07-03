@@ -23,14 +23,14 @@ def set_urls_dict():
 
     urls_dict['Top Stories'] = URL('https://news.google.com/nwshp?hl=en&tab=nn')
 
-    '''urls_dict['World'] = URL(url_prefix + 'w')
+    urls_dict['World'] = URL(url_prefix + 'w')
     urls_dict['U.S.'] = URL(url_prefix + 'n')
     urls_dict['Business'] = URL(url_prefix + 'b')
     urls_dict['Technology'] = URL(url_prefix + 'tc')
     urls_dict['Entertainment'] = URL(url_prefix + 'e')
     urls_dict['Sports'] = URL(url_prefix + 's')
     urls_dict['Health'] = URL(url_prefix + 'm')
-    urls_dict['Science'] = URL(url_prefix + 'snc')'''
+    urls_dict['Science'] = URL(url_prefix + 'snc')
 
     return urls_dict
 
@@ -70,8 +70,8 @@ def get_ner_entities(string, name=None, host='localhost', port=8888, output_form
 def get_articles(ttopic):
     from classes.article import _Article  # custom module
 
-    #feed = feedparser.parse(ttopic.url)
-    feed = feedparser.parse(r'/home/narhodes/Documents/google_news_feed/kim_kardashian.rss')
+    feed = feedparser.parse(ttopic.url)
+    #feed = feedparser.parse(r'/home/narhodes/Documents/google_news_feed/kim_kardashian.rss')
     entries = feed.entries
 
     articles = []
@@ -81,13 +81,6 @@ def get_articles(ttopic):
         # article URL
         url = str(entries[i].link)
         url = url[url.find('&url=') + 5:]
-
-        # number of similar articles
-        search = re.search("all (\d+) news articles", entries[i].summary)
-        if (search is not None):
-            num_similar = search.group(1)
-        else:
-            num_similar = 0
 
         # convert unicode to string
         title = entries[i].title.encode('ascii', 'ignore')
@@ -106,7 +99,7 @@ def get_articles(ttopic):
         entity_freqs = collections.Counter(entities).most_common()
 
         ttopic.Article = _Article  # set inner class
-        article_obj = ttopic.Article(title, url, num_similar, entity_freqs, ttopic.freqs)
+        article_obj = ttopic.Article(title, url, entity_freqs, ttopic.freqs)
         articles.append(article_obj)
 
     return articles
@@ -116,8 +109,8 @@ def get_trending_topics(section):
     from classes.ttopic import _TTopic  # custom module
 
     gn_nav_topic_list = 'nav-topic-list'  # DOM
-    #topics_element = Element(section.url.download()).by_id(gn_nav_topic_list)
-    topics_element = None
+    topics_element = Element(section.url.download()).by_id(gn_nav_topic_list)
+    #topics_element = None
 
     if topics_element is not None:
         plaintext_src = plaintext(topics_element.source)
@@ -154,3 +147,53 @@ def remove_unrelated_articles(ttopic):
             new_articles.append(article)
 
     return new_articles
+
+
+def cluster_entities(entities):
+    from operator import itemgetter
+
+    entities_keys = entities.keys()
+    groups = []
+
+    for i in range(len(entities_keys)):
+        curr = entities_keys[i]
+        curr_group = set([(curr, entities[curr])])
+        for j in range(i + 1, len(entities_keys)):
+            rest = entities_keys[j]
+            if curr.lower() in rest.lower():
+                if entities[curr] == entities[rest] and (curr, entities[curr]) in curr_group:
+                    curr_group.remove((curr, entities[curr]))
+                curr_group.add((rest, entities[rest]))
+            if rest.lower() in curr.lower() and entities[curr] != entities[rest]:
+                curr_group.add((rest, entities[rest]))
+
+        prev_entity = None
+        for entity in sorted(curr_group, key=itemgetter(1), reverse=True):
+            if prev_entity is not None:
+                if (prev_entity[1] == entity[1]):
+                    if (len(entity[0]) < len(prev_entity[0])):
+                        curr_group.remove(entity)
+                    else:
+                        curr_group.remove(prev_entity)
+                        prev_entity = entity
+                else:
+                    prev_entity = entity
+            else:
+                prev_entity = entity
+
+        groups.append(curr_group)
+
+    tmp = []
+    used = []
+    for i in range(len(groups)):
+        s = groups[i]
+        if s not in used:
+            for j in range(i + 1, len(groups)):
+                t = groups[j]
+                if t not in used and len(s & t):
+                    s = s | t
+                    used.append(t)
+            tmp.append(dict(s))
+
+    groups = tmp
+    return groups
