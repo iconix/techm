@@ -1,0 +1,4 @@
+[submodule "pyner"]
+	path = pyner
+	url = git://github.com/iconix/techm.git
+	ignore = dirty
