@@ -1,0 +1,27 @@
+*.py[cod]
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+
+# Temp files
+*~
+
+# Misc. files in tracked folder
+notes.txt
+ntt*
+pyPrefixspan.py
+stanford-ner/
+temp.*
+
