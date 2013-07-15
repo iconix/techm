@@ -7,22 +7,22 @@ from utils import get_trending_topics
 class Section(object):  # new-style class, inherits from 'object'
     def __str__(self):
         # JSON formatted
-        return ('{"name": "' + str(self.name) +
+        return ('{"title": "' + str(self.title) +
                 '", "url": "' + str(self.url) +
                 '", "TTOPICS": ' + str(self.trending_topics) + '}')
 
     def __repr__(self):
         return str(self)
 
-    def __init__(self, name, url):
+    def __init__(self, title, url):
         self._TTopic = None  # inner class
-        self._name = name
+        self._title = title
         self._url = url
         self._trending_topics = get_trending_topics(self)
 
     @property
-    def name(self):
-        return self._name
+    def title(self):
+        return self._title
 
     @property
     def url(self):

@@ -12,9 +12,9 @@ def main():
     count = 1
     total = len(urls)
 
-    for name, url in urls.iteritems():
-        print "Creating section", count, "of", total, "... (", name, ")"
-        s_obj = Section(name, url)
+    for title, url in urls.iteritems():
+        print "Creating section", count, "of", total, "... (", title, ")"
+        s_obj = Section(title, url)
         sections.append(s_obj)
         count += 1
 

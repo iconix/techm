@@ -16,6 +16,12 @@ import collections
 # also in namespace: classes.ttopic._TTopic
 from pattern.web import Element, plaintext
 
+# build_entities()
+# in namespace: classes.entity._Entity
+
+# cluster_entities()
+from operator import attrgetter
+
 
 def set_urls_dict():
     url_prefix = 'https://news.google.com/news/section?pz=1&cf=all&topic='
@@ -67,11 +73,48 @@ def get_ner_entities(string, name=None, host='localhost', port=8888, output_form
     return entity_values
 
 
+def get_entities(ttopic):
+    from classes.ps import PrefixSpan  # custom module
+
+    articles = get_articles(ttopic)
+    all_ttopic_freqs = []  # build list of entities for ENTIRE trending topic
+
+    for article in articles:
+        title = article.title
+        entities = get_ner_entities(title, ttopic.name)
+
+        # count occurrences of each entity (returns list of tuples)
+        entity_freqs = collections.Counter(entities).most_common()
+        for e in entity_freqs:
+            all_ttopic_freqs.append(str(e[0])*int(e[1]))
+
+    # start PrefixSpan
+    db = []
+    for entity in all_ttopic_freqs:
+        db.append(re.split('\s+', entity))
+    span = PrefixSpan(db)
+    span.run(2)
+    patterns = span.get_patterns()
+
+    formatted_patterns = []
+    for p in patterns:
+        p0 = ' '.join(p[0])
+        t = [p0] * int(p[1])
+        formatted_patterns.extend(t)
+    # end PrefixSpan
+
+    all_ttopic_freqs = collections.Counter(formatted_patterns).most_common()
+    entities = build_entities(ttopic, all_ttopic_freqs, articles)
+    entities = cluster_entities(entities)
+
+    return entities
+
+
 def get_articles(ttopic):
     from classes.article import _Article  # custom module
 
     feed = feedparser.parse(ttopic.url)
-    #feed = feedparser.parse(r'/home/narhodes/Documents/google_news_feed/kim_kardashian.rss')
+    #feed = feedparser.parse(r'/home/narhodes/Documents/google_news_feed/data-layer/output/kim_kardashian.rss')
     entries = feed.entries
 
     articles = []
@@ -93,13 +136,8 @@ def get_articles(ttopic):
         if end != -1:  # substring not found
             title = title[:end]
 
-        entities = get_ner_entities(title, ttopic.name)
-
-        # count occurrences of each entity (returns list of tuples)
-        entity_freqs = collections.Counter(entities).most_common()
-
         ttopic.Article = _Article  # set inner class
-        article_obj = ttopic.Article(title, url, entity_freqs, ttopic.freqs)
+        article_obj = ttopic.Article(title, url)
         articles.append(article_obj)
 
     return articles
@@ -131,55 +169,61 @@ def get_trending_topics(section):
     return trending_topics
 
 
-def remove_unrelated_articles(ttopic):
-    entities = dict(ttopic.freqs).keys()
+def build_entities(ttopic, all_ttopic_freqs, articles):
+    from classes.entity import _Entity  # custom module
 
-    new_articles = []
-    for article in ttopic.articles:
-        if not len(article.entity_freqs):
-            continue
+    ttopic.Entity = _Entity  # set inner class
+    entities = []
+    used_tuples = []
 
-        is_in_article = False
-        for entity in entities:
-            if entity in article.entity_freqs.keys():
-                is_in_article = True
-        if is_in_article:
-            new_articles.append(article)
+    for article in articles:
+        for name, count in dict(all_ttopic_freqs).items():
+            if name in article.title:
+                if (name, count) in used_tuples:
+                    index = used_tuples.index((name, count))
+                    e_obj = entities.pop(index)
+                    used_tuples.pop(index)
+                else:
+                    e_obj = ttopic.Entity(name, count)
 
-    return new_articles
+                e_obj.add_article(article)
+                entities.append(e_obj)
+                used_tuples.append((name, count))
+
+    return entities
 
 
 def cluster_entities(entities):
-    from operator import itemgetter
-
-    entities_keys = entities.keys()
+    # there's definitely a better way to do this
+    # by passing around indices into "entities" list rather
+    # then the entities themselves...
     groups = []
 
-    for i in range(len(entities_keys)):
-        curr = entities_keys[i]
-        curr_group = set([(curr, entities[curr])])
-        for j in range(i + 1, len(entities_keys)):
-            rest = entities_keys[j]
-            if curr.lower() in rest.lower():
-                if entities[curr] == entities[rest] and (curr, entities[curr]) in curr_group:
-                    curr_group.remove((curr, entities[curr]))
-                curr_group.add((rest, entities[rest]))
-            if rest.lower() in curr.lower() and entities[curr] != entities[rest]:
-                curr_group.add((rest, entities[rest]))
+    for i in range(len(entities)):
+        curr = entities[i]
+        curr_group = set([curr])
+        for j in range(i + 1, len(entities)):
+            other = entities[j]
+            if curr.name.lower() in other.name.lower():
+                if curr.count == other.count and curr in curr_group:
+                    curr_group.remove(curr)
+                curr_group.add(other)
+            if other.name.lower() in curr.name.lower() and curr.count != other.count:
+                curr_group.add(other)
 
-        prev_entity = None
-        for entity in sorted(curr_group, key=itemgetter(1), reverse=True):
-            if prev_entity is not None:
-                if (prev_entity[1] == entity[1]):
-                    if (len(entity[0]) < len(prev_entity[0])):
-                        curr_group.remove(entity)
+        prev_e = None
+        for e in sorted(curr_group, key=attrgetter('count'), reverse=True):
+            if prev_e is not None:
+                if (prev_e.count == e.count):
+                    if (len(e.name) < len(prev_e.name)):
+                        curr_group.remove(e)
                     else:
-                        curr_group.remove(prev_entity)
-                        prev_entity = entity
+                        curr_group.remove(prev_e)
+                        prev_e = e
                 else:
-                    prev_entity = entity
+                    prev_e = e
             else:
-                prev_entity = entity
+                prev_e = e
 
         groups.append(curr_group)
 
@@ -193,7 +237,7 @@ def cluster_entities(entities):
                 if t not in used and len(s & t):
                     s = s | t
                     used.append(t)
-            tmp.append(dict(s))
+            tmp.append(list(s))
 
     groups = tmp
     return groups

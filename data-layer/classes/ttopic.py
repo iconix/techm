@@ -1,18 +1,10 @@
 #!/usr/bin/env python
 
-import collections
-import json
-import re
 import unicodedata
 import urllib
 
 # custom modules
-from utils import (
-    get_articles,
-    remove_unrelated_articles,
-    cluster_entities
-)
-from classes.ps import PrefixSpan
+from utils import get_entities
 
 
 class _TTopic(object):  # new-style class, inherits from 'object'
@@ -20,8 +12,7 @@ class _TTopic(object):  # new-style class, inherits from 'object'
             # JSON formatted
             return ('{"name": "' + str(self.name) +
                     '", "url": "' + str(self.url) +
-                    '", "all_topic_entities": ' + json.dumps(self.freqs) +
-                    ', "ARTICLES": ' + str(self.articles) + '}')
+                    '", "ENTITIES": ' + str(self.entities) + '}')
 
         def __repr__(self):
             return str(self)
@@ -37,27 +28,7 @@ class _TTopic(object):  # new-style class, inherits from 'object'
             self._Article = None  # inner class
             self._name = normalized_name
             self._url = url_str
-            self._freqs = []
-            self._articles = get_articles(self)
-
-            # start PrefixSpan
-            db = []
-            for entity in self._freqs:
-                db.append(re.split('\s+', entity))
-            span = PrefixSpan(db)
-            span.run(2)
-            patterns = span.get_patterns()
-
-            formatted_patterns = []
-            for p in patterns:
-                p0 = ' '.join(p[0])
-                t = [p0] * int(p[1])
-                formatted_patterns.extend(t)
-            # end PrefixSpan
-
-            self._freqs = collections.Counter(formatted_patterns).most_common()
-            self._articles = remove_unrelated_articles(self)
-            self._freqs = cluster_entities(dict(self._freqs))
+            self._entities = get_entities(self)
 
         @property
         def name(self):
@@ -68,12 +39,8 @@ class _TTopic(object):  # new-style class, inherits from 'object'
             return self._url
 
         @property
-        def articles(self):
-            return self._articles
-
-        @property
-        def freqs(self):
-            return self._freqs
+        def entities(self):
+            return self._entities
 
         @property
         def Article(self):
