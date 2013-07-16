@@ -5,4 +5,9 @@ class Section < ActiveRecord::Base
   has_many :clusters, through: :ttopics
   has_many :entities, through: :clusters
   has_many :articles, through: :entities
+
+  belongs_to :ref_section
+
+  validates :title, presence: true
+  validates :url, presence: true
 end
