@@ -1,9 +1,7 @@
 class Article < ActiveRecord::Base
   attr_accessible :title, :url
 
-  #belongs_to :entity
-
-  has_many :ref_entities
+  has_and_belongs_to_many :entities
 
   validates :title, uniqueness: true
   validates :url, uniqueness: true
