@@ -1,4 +1,8 @@
 Client::Application.routes.draw do
+  resources :sections
+
+  root to: 'sections#show'
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
