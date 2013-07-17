@@ -1,2 +1,15 @@
 <% provide(:title, @section.title) %>
-<h1><%= @section.title %></h1>
+<h3><%= @section.title %></h3>
+<div id="trending-topics" class="container-fluid">
+  <div class="row-fluid span10 offset1">
+    <% num = 0 %>
+    <% per_row = @section.ttopics.count / 2 %>
+    <% @section.ttopics.each do |ttopic| %>
+      <div class="span2"><%= ttopic.name %></div>
+      <% if num != 0 and num % per_row == 0 %>
+        </div>
+        <div class="row-fluid span10 offset1">
+      <% end %>
+    <% end %>
+  </div>
+</div>

@@ -1,3 +1,20 @@
 // Place all the styles related to the Sections controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+#trending-topics {
+  overflow: hidden;
+  padding: 0;
+}
+
+#trending-topics .row-fluid {
+  overflow: hidden;
+}
+
+#trending-topics .span2 {
+  color: white;
+  background-color: #34495e;
+  border: 1px solid #1abc9c;
+  margin: 0;
+  text-align: center;
+}
