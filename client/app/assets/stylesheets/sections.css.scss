@@ -16,5 +16,20 @@
   background-color: #34495e;
   border: 1px solid #1abc9c;
   margin: 0;
+  padding: 5px;
   text-align: center;
+}
+
+#trending-topics .ttopic {
+  font-variant: small-caps;
+  font-size: 18px;
+}
+
+#trending-topics .entities {
+  color: #1abc9c;
+  text-align: left;
+}
+
+#trending-topics .entities p {
+  margin: 0 0 3px;
 }

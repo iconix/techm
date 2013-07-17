@@ -5,7 +5,15 @@
     <% num = 0 %>
     <% per_row = @section.ttopics.count / 2 %>
     <% @section.ttopics.each do |ttopic| %>
-      <div class="span2"><%= ttopic.name %></div>
+      <div class="span2">
+        <p class="ttopic"><%= ttopic.name %></p>
+          <div class="entities">
+            <% ttopic.clusters.sort{ |a,b| a.max_count <=> b.max_count}.reverse.each do |cluster| %>
+              <% max_count = cluster.max_count %>
+              <p><%= cluster.entities.find_by_count(max_count).name %></p>
+            <% end %>
+          </div>
+      </div>
       <% if num != 0 and num % per_row == 0 %>
         </div>
         <div class="row-fluid span10 offset1">

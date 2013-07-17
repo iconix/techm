@@ -30,6 +30,7 @@ ActiveRecord::Schema.define(:version => 20130716080344) do
   add_index "articles_entities", ["article_id", "entity_id"], :name => "index_articles_entities_on_article_id_and_entity_id"
 
   create_table "clusters", :force => true do |t|
+    t.integer  "max_count"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
     t.integer  "ttopic_id"
