@@ -8,29 +8,38 @@
       <div class="span2">
         <p class="ttopic"><%= ttopic.name %></p>
           <div class="entities">
+            <% all_entities = Set.new %>
+            <% iter = 0 %>
             <% ttopic.clusters.sort{ |a,b| a.max_count <=> b.max_count}.reverse.each do |cluster| %>
+              <% next if iter == 10 %>
               <% max_count = cluster.max_count %>
               <% entity = cluster.entities.find_by_count(max_count) %>
-              <% entities = Array.new(cluster.entities) %>
-              <% entities.delete(entity) %>
-              <% if entities.empty? %>
-                <p><%= entity.name %></p>
-              <% else %>
-                <p><%= entity.name %>*</p>
-                <div class="tooltip fade right in">
-                  <div class="tooltip-inner">
-                    <% entities.each do |e| %>
-                      <p><%= e.name %></p>
-                    <% end %>
+              <% unless all_entities.member? entity.name %>
+                <% entities = Array.new(cluster.entities) %>
+                <% entities.delete(entity) %>
+                <% if entities.empty? %>
+                  <p><%= entity.name %></p>
+                <% else %>
+                  <p><%= entity.name %>*</p>
+                  <div class="tooltip fade right in">
+                    <div class="tooltip-inner">
+                      <% entities.each do |e| %>
+                        <p><%= e.name %></p>
+                      <% end %>
+                    </div>
                   </div>
-                </div>
+                <% end %>
+                <% all_entities.add(entity.name) %>
+                <% iter += 1 %>
               <% end %>
             <% end %>
           </div>
       </div>
+      <% num += 1 %>
       <% if num != 0 and num % per_row == 0 %>
         </div>
         <div class="row-fluid span10 offset1">
+        <% num = 0 %>
       <% end %>
     <% end %>
   </div>
