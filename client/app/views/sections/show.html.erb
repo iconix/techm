@@ -1,5 +1,5 @@
 <% provide(:title, @section.title) %>
-<h3><%= @section.title %></h3>
+
 <div id="trending-topics" class="container-fluid">
   <div class="row-fluid span10 offset1">
     <% num = 0 %>
@@ -10,7 +10,21 @@
           <div class="entities">
             <% ttopic.clusters.sort{ |a,b| a.max_count <=> b.max_count}.reverse.each do |cluster| %>
               <% max_count = cluster.max_count %>
-              <p><%= cluster.entities.find_by_count(max_count).name %></p>
+              <% entity = cluster.entities.find_by_count(max_count) %>
+              <% entities = Array.new(cluster.entities) %>
+              <% entities.delete(entity) %>
+              <% if entities.empty? %>
+                <p><%= entity.name %></p>
+              <% else %>
+                <p><%= entity.name %>*</p>
+                <div class="tooltip fade right in">
+                  <div class="tooltip-inner">
+                    <% entities.each do |e| %>
+                      <p><%= e.name %></p>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
             <% end %>
           </div>
       </div>

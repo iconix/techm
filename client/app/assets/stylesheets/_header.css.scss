@@ -6,3 +6,23 @@ header .navbar {
   width: 80%;
   margin: 0 auto;
 }
+
+header .navbar .nav-tabs {
+  border: none;
+}
+
+header .navbar .nav-tabs > li > a {
+  border: none;
+}
+
+header .navbar .nav-tabs > li > a:hover {
+  border: none;
+}
+
+header .navbar-inverse .nav-tabs > #active {
+  background-color: #1abc9c;
+}
+
+header .navbar-inverse .nav-tabs > #active a {
+  color: white;
+}

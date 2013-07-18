@@ -2,10 +2,10 @@
 <header>
   <div class="navbar navbar-inverse">
     <div class="navbar-inner">
-      <ul class="nav">
+      <ul class="nav nav-tabs">
         <% @sections.each do |section| %>
           <% if @section == section %>
-            <li class="active">
+            <li id="active">
               <%= link_to section.title, section_path(section.id) %>
             </li>
           <% else %>

@@ -4,7 +4,7 @@
 
 #trending-topics {
   overflow: hidden;
-  padding: 0;
+  padding: 25px 0 0 0;
 }
 
 #trending-topics .row-fluid {
@@ -16,20 +16,34 @@
   background-color: #34495e;
   border: 1px solid #1abc9c;
   margin: 0;
-  padding: 5px;
-  text-align: center;
+  padding: 10px;
 }
 
 #trending-topics .ttopic {
   font-variant: small-caps;
   font-size: 18px;
+  text-align: center;
 }
 
 #trending-topics .entities {
   color: #1abc9c;
-  text-align: left;
+  position: relative;
 }
 
 #trending-topics .entities p {
   margin: 0 0 3px;
+}
+
+#trending-topics .entities > .tooltip {
+  display: none;
+}
+
+#trending-topics .entities p:hover + .tooltip {
+  display: block;
+  top: 0;
+  left: 165px;
+}
+
+#trending-topics .entities p:hover + .tooltip.in {
+  opacity: 0.85;
 }
