@@ -19,12 +19,22 @@
                 <% entities.delete(entity) %>
                 <% if entities.empty? %>
                   <p><%= entity.name %></p>
+                  <div class="tooltip fade right in">
+                    <div class="tooltip-inner">
+                      <% entity.articles.each do |article| %>
+                        <p><%= article.title %></p>
+                      <% end %>
+                    </div>
+                  </div>
                 <% else %>
                   <p><%= entity.name %>*</p>
                   <div class="tooltip fade right in">
                     <div class="tooltip-inner">
                       <% entities.each do |e| %>
                         <p><%= e.name %></p>
+                      <% end %>
+                      <% entity.articles.each do |article| %>
+                        <p><%= article.title %></p>
                       <% end %>
                     </div>
                   </div>
