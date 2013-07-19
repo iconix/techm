@@ -37,6 +37,11 @@
 
 #trending-topics .entities > .tooltip {
   display: none;
+  background-color: #1abc9c;
+}
+
+#trending-topics .entities > .tooltip > .tooltip-inner {
+  background-color: #1abc9c;
 }
 
 #trending-topics .entities p:hover + .tooltip {
