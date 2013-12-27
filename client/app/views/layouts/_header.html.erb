@@ -1,28 +1,20 @@
 <h1>THE TECH MACHINE</h1>
 <header>
-  <div class="navbar navbar-inverse">
-    <div class="navbar-inner">
-      <ul class="nav nav-tabs">
-        <% @sections.each do |section| %>
-          <% if @section == section %>
-            <li id="active">
-              <%= link_to section.title, section_path(section.id) %>
-            </li>
-          <% else %>
-            <li>
-              <%= link_to section.title, section_path(section.id) %>
-            </li>
-          <% end %>
-        <% end %>
-        <!--<li><%= link_to 'World', '#' %></li>
-        <li><%= link_to 'U.S.', '#' %></li>
-        <li><%= link_to 'Business', '#' %></li>
-        <li><%= link_to 'Technology', '#' %></li>
-        <li><%= link_to 'Entertainment', '#' %></li>
-        <li><%= link_to 'Sports', '#' %></li>
-        <li><%= link_to 'Health', '#' %></li>
-        <li><%= link_to 'Science', '#' %></li>-->
-      </ul>
-    </div>
+  <div id="navbar">
+    <% @sections.each do |section| %>
+      <% if @section == section %>
+        <p class="section" id="active"><%=section.title%></p>
+      <% else %>
+        <%= link_to section.title, section_path(section.id), class: "section" %>
+      <% end %>
+    <% end %>
+    <!--<li><%= link_to 'World', '#' %></li>
+    <li><%= link_to 'U.S.', '#' %></li>
+    <li><%= link_to 'Business', '#' %></li>
+    <li><%= link_to 'Technology', '#' %></li>
+    <li><%= link_to 'Entertainment', '#' %></li>
+    <li><%= link_to 'Sports', '#' %></li>
+    <li><%= link_to 'Health', '#' %></li>
+    <li><%= link_to 'Science', '#' %></li>-->
   </div>
 </header>

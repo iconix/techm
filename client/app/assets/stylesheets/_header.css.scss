@@ -1,28 +1,14 @@
-header {
-  background-color: #34495e;
+#navbar {
+  overflow: auto;
+  text-align: center;
 }
 
-header .navbar {
-  width: 80%;
-  margin: 0 auto;
+.section {
+  display: block;
+  float: left;
+  margin: 1% 0 1% 1.6%;
 }
 
-header .navbar .nav-tabs {
-  border: none;
-}
-
-header .navbar .nav-tabs > li > a {
-  border: none;
-}
-
-header .navbar .nav-tabs > li > a:hover {
-  border: none;
-}
-
-header .navbar-inverse .nav-tabs > #active {
-  background-color: #1abc9c;
-}
-
-header .navbar-inverse .nav-tabs > #active a {
-  color: white;
+#active {
+  border: solid;
 }

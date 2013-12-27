@@ -1,12 +1,12 @@
 <% provide(:title, @section.title) %>
 
-<div id="trending-topics" class="container-fluid">
-  <div class="row-fluid span10 offset1">
+<div id="trending-topics">
+  <div>
     <% num = 0 %>
     <% per_row = @section.ttopics.count / 2 %>
     <% @section.ttopics.each do |ttopic| %>
-      <div class="span2">
-        <p class="ttopic"><%= ttopic.name %></p>
+      <div class="ttopic">
+        <p><%= ttopic.name %></p>
           <div class="entities">
             <% all_entities = Set.new %>
             <% iter = 0 %>
@@ -19,17 +19,17 @@
                 <% entities.delete(entity) %>
                 <% if entities.empty? %>
                   <p><%= entity.name %></p>
-                  <div class="tooltip fade right in">
-                    <div class="tooltip-inner">
+                  <!--<div>
+                    <div>
                       <% entity.articles.each do |article| %>
                         <p><%= article.title %></p>
                       <% end %>
                     </div>
-                  </div>
+                  </div>-->
                 <% else %>
                   <p><%= entity.name %>*</p>
-                  <div class="tooltip fade right in">
-                    <div class="tooltip-inner">
+                  <!--<div>
+                    <div>
                       <% entities.each do |e| %>
                         <p><%= e.name %></p>
                       <% end %>
@@ -37,7 +37,7 @@
                         <p><%= article.title %></p>
                       <% end %>
                     </div>
-                  </div>
+                  </div>-->
                 <% end %>
                 <% all_entities.add(entity.name) %>
                 <% iter += 1 %>
@@ -48,7 +48,7 @@
       <% num += 1 %>
       <% if num != 0 and num % per_row == 0 %>
         </div>
-        <div class="row-fluid span10 offset1">
+        <div>
         <% num = 0 %>
       <% end %>
     <% end %>

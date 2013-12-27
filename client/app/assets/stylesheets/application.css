@@ -12,18 +12,7 @@
  *= require_tree .
  */
 
-html, body {
-  /*height: 100%; /* for sticky footer */
-  /*overflow: hidden;*/
-}
-
 h1,
 h3 {
-  text-align:center;
-}
-
-.container-fluid {
-  background-color: #1abc9c;
-  /*height: 100%; /* for sticky footer */
-  /*overflow: hidden;*/
+  margin: 1% 0 1% 1.6%;
 }

@@ -4,52 +4,24 @@
 
 #trending-topics {
   overflow: hidden;
-  padding: 25px 0 0 0;
-}
-
-#trending-topics .row-fluid {
-  overflow: hidden;
-}
-
-#trending-topics .span2 {
-  color: white;
-  background-color: #34495e;
-  border: 1px solid #1abc9c;
-  margin: 0;
-  padding: 10px;
-  height: 254px;
 }
 
 #trending-topics .ttopic {
+  display: block;
+  float: left;
+  margin: 1% 0 1% 1.6%;
+}
+
+#trending-topics .ttopic p {
   font-variant: small-caps;
   font-size: 18px;
   text-align: center;
 }
 
 #trending-topics .entities {
-  color: #1abc9c;
   position: relative;
 }
 
 #trending-topics .entities p {
   margin: 0 0 3px;
-}
-
-#trending-topics .entities > .tooltip {
-  display: none;
-  background-color: #1abc9c;
-}
-
-#trending-topics .entities > .tooltip > .tooltip-inner {
-  background-color: #1abc9c;
-}
-
-#trending-topics .entities p:hover + .tooltip {
-  display: block;
-  top: 0;
-  left: 165px;
-}
-
-#trending-topics .entities p:hover + .tooltip.in {
-  opacity: 0.85;
 }
