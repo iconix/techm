@@ -1,12 +1,11 @@
 <% provide(:title, @section.title) %>
 
 <div id="trending-topics">
-  <div>
     <% num = 0 %>
     <% per_row = @section.ttopics.count / 2 %>
     <% @section.ttopics.each do |ttopic| %>
       <div class="ttopic">
-        <p><%= ttopic.name %></p>
+        <p title="<%= ttopic.name %>"><%= ttopic.name %></p>
           <div class="entities">
             <% all_entities = Set.new %>
             <% iter = 0 %>
@@ -18,26 +17,30 @@
                 <% entities = Array.new(cluster.entities) %>
                 <% entities.delete(entity) %>
                 <% if entities.empty? %>
-                  <p><%= entity.name %></p>
-                  <!--<div>
+                  <p title="<%= entity.name %>"><%= entity.name %></p>
+                  <div class="tooltip">
                     <div>
+                      <p>ARTICLES</p>
                       <% entity.articles.each do |article| %>
                         <p><%= article.title %></p>
                       <% end %>
                     </div>
-                  </div>-->
+                  </div>
                 <% else %>
-                  <p><%= entity.name %>*</p>
-                  <!--<div>
+                  <p title="<%= entity.name %>"><%= entity.name %>*</p>
+                  <div class="tooltip">
                     <div>
+                      <p>OTHER ENTITIES IN CLUSTER</p>
                       <% entities.each do |e| %>
                         <p><%= e.name %></p>
                       <% end %>
+                      <br />
+                      <p>ARTICLES</p>
                       <% entity.articles.each do |article| %>
                         <p><%= article.title %></p>
                       <% end %>
                     </div>
-                  </div>-->
+                  </div>
                 <% end %>
                 <% all_entities.add(entity.name) %>
                 <% iter += 1 %>
@@ -47,10 +50,7 @@
       </div>
       <% num += 1 %>
       <% if num != 0 and num % per_row == 0 %>
-        </div>
-        <div>
         <% num = 0 %>
       <% end %>
     <% end %>
-  </div>
 </div>
