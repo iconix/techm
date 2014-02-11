@@ -4,7 +4,7 @@ require 'set'
 namespace :populate do
   desc "Fill database with Google News data"
   task gn: :environment do
-  	parsed = JSON.parse(File.read(File.join(File.dirname(__FILE__), '../../../', 'data-layer/output/full_output.json')))
+  	parsed = JSON.parse(File.read(File.join(File.dirname(__FILE__), '../../../', 'data-layer/output/full_output_021113.json')))
   	
     sections = parsed["SECTIONS"]
     for s in sections

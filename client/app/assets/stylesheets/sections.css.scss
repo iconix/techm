@@ -2,11 +2,11 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-#trending-topics {
+.trending-topics {
   //overflow: hidden;
 }
 
-#trending-topics .ttopic {
+.trending-topics .ttopic {
   width: 140px;
   height: 260px;
 	margin: 0 10px 30px 0;
@@ -17,17 +17,17 @@
   white-space: nowrap;
 }
 
-#trending-topics .ttopic p {
+.trending-topics .ttopic p {
   font-weight: bold;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-#trending-topics .entities {
+.trending-topics .entities {
   position: relative;
 }
 
-#trending-topics .entities p {
+.trending-topics .entities p {
   font-weight: normal;
   margin: 0 0 3px 0;
 }
@@ -36,7 +36,7 @@
   display: none;
 }
 
-#trending-topics .entities p:hover + .tooltip {
+.trending-topics .entities p:hover + .tooltip {
   display: block;
   position: absolute;
   left: 140px;

@@ -1,56 +1,61 @@
-<% provide(:title, @section.title) %>
-
-<div id="trending-topics">
-    <% num = 0 %>
-    <% per_row = @section.ttopics.count / 2 %>
-    <% @section.ttopics.each do |ttopic| %>
-      <div class="ttopic">
-        <p title="<%= ttopic.name %>"><%= ttopic.name %></p>
-          <div class="entities">
-            <% all_entities = Set.new %>
-            <% iter = 0 %>
-            <% ttopic.clusters.sort{ |a,b| a.max_count <=> b.max_count}.reverse.each do |cluster| %>
-              <% next if iter == 10 %>
-              <% max_count = cluster.max_count %>
-              <% entity = cluster.entities.find_by_count(max_count) %>
-              <% unless all_entities.member? entity.name %>
-                <% entities = Array.new(cluster.entities) %>
-                <% entities.delete(entity) %>
-                <% if entities.empty? %>
-                  <p title="<%= entity.name %>"><%= entity.name %></p>
-                  <div class="tooltip">
-                    <div>
-                      <p>ARTICLES</p>
-                      <% entity.articles.each do |article| %>
-                        <p><%= article.title %></p>
-                      <% end %>
-                    </div>
-                  </div>
-                <% else %>
-                  <p title="<%= entity.name %>"><%= entity.name %>*</p>
-                  <div class="tooltip">
-                    <div>
-                      <p>OTHER ENTITIES IN CLUSTER</p>
-                      <% entities.each do |e| %>
-                        <p><%= e.name %></p>
-                      <% end %>
-                      <br />
-                      <p>ARTICLES</p>
-                      <% entity.articles.each do |article| %>
-                        <p><%= article.title %></p>
-                      <% end %>
-                    </div>
-                  </div>
-                <% end %>
-                <% all_entities.add(entity.name) %>
-                <% iter += 1 %>
-              <% end %>
-            <% end %>
-          </div>
-      </div>
-      <% num += 1 %>
-      <% if num != 0 and num % per_row == 0 %>
+<% @sections.each do |section| %>
+  <div class="section">
+    <h1 class="section-title">
+      <%= section.title %>
+    </h1>
+    <div class="trending-topics">
         <% num = 0 %>
-      <% end %>
-    <% end %>
-</div>
+        <% per_row = section.ttopics.count / 2 %>
+        <% section.ttopics.each do |ttopic| %>
+          <div class="ttopic">
+            <p title="<%= ttopic.name %>"><%= ttopic.name %></p>
+              <div class="entities">
+                <% all_entities = Set.new %>
+                <% iter = 0 %>
+                <% ttopic.clusters.sort{ |a,b| a.max_count <=> b.max_count}.reverse.each do |cluster| %>
+                  <% next if iter == 10 %>
+                  <% max_count = cluster.max_count %>
+                  <% entity = cluster.entities.find_by_count(max_count) %>
+                  <% unless all_entities.member? entity.name %>
+                    <% entities = Array.new(cluster.entities) %>
+                    <% entities.delete(entity) %>
+                    <% if entities.empty? %>
+                      <p title="<%= entity.name %>"><%= entity.name %></p>
+                      <div class="tooltip">
+                        <div>
+                          <p>ARTICLES</p>
+                          <% entity.articles.each do |article| %>
+                            <p><%= article.title %></p>
+                          <% end %>
+                        </div>
+                      </div>
+                    <% else %>
+                      <p title="<%= entity.name %>"><%= entity.name %>*</p>
+                      <div class="tooltip">
+                        <div>
+                          <p>OTHER ENTITIES IN CLUSTER</p>
+                          <% entities.each do |e| %>
+                            <p><%= e.name %></p>
+                          <% end %>
+                          <br />
+                          <p>ARTICLES</p>
+                          <% entity.articles.each do |article| %>
+                            <p><%= article.title %></p>
+                          <% end %>
+                        </div>
+                      </div>
+                    <% end %>
+                    <% all_entities.add(entity.name) %>
+                    <% iter += 1 %>
+                  <% end %>
+                <% end %>
+              </div>
+          </div>
+          <% num += 1 %>
+          <% if num != 0 and num % per_row == 0 %>
+            <% num = 0 %>
+          <% end %>
+        <% end %>
+    </div>
+  <div>
+<% end %>
